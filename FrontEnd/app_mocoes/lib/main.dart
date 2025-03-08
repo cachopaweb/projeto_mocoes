@@ -1,9 +1,11 @@
+import 'package:app_mocoes/models/cidades_model.dart';
 import 'package:app_mocoes/models/mocoes_model.dart';
 import 'package:app_mocoes/pages/cidades_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'controllers/usuario_controller.dart';
+import 'pages/candidatos_page.dart';
 import 'pages/mocoes_page.dart';
 import 'pages/login_page.dart';
 import 'pages/splash_page.dart';
@@ -35,6 +37,10 @@ class MyApp extends StatelessWidget {
         '/cidades': (context) => CidadesPage(
               mocaoModel:
                   ModalRoute.of(context)!.settings.arguments as MocoesModel,
+            ),
+        '/candidatos': (context) => CandidatosPage(
+              cidadesModel:
+                  ModalRoute.of(context)!.settings.arguments as CidadesModel,
             ),
       },
     );

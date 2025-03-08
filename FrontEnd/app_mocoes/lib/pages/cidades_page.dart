@@ -12,14 +12,18 @@ class CidadesPage extends StatelessWidget {
 
   CidadesPage({super.key, required this.mocaoModel});
 
-  _buildSuccess(List<CidadesModel> lista) {
+  _buildSuccess(BuildContext context, List<CidadesModel> lista) {
     return ListView.builder(
       itemCount: lista.length,
       itemBuilder: (_, index) {
-        return Card(
-          elevation: 15,
-          child: ListTile(
-            title: Text(lista[index].nome),
+        return GestureDetector(
+          onTap: () => Navigator.of(context)
+              .pushNamed('/candidatos', arguments: lista[index]),
+          child: Card(
+            elevation: 15,
+            child: ListTile(
+              title: Text(lista[index].nome),
+            ),
           ),
         );
       },
@@ -38,13 +42,13 @@ class CidadesPage extends StatelessWidget {
     );
   }
 
-  _buildBody(UsuarioController controller) {
+  _buildBody(BuildContext context, UsuarioController controller) {
     return FutureBuilder(
       future:
           respository.fetchCidades(controller.usuarioLogado.estadoEscolhido!),
       builder: (context, snapshot) => switch (snapshot) {
         (AsyncSnapshot<List<CidadesModel>> result) when result.hasData =>
-          _buildSuccess(result.data!),
+          _buildSuccess(context, result.data!),
         (AsyncSnapshot<List<MocoesModel>> result) when !result.hasError =>
           _buildLoading(),
         (_) => _buildError('Nada encontrado...'),
@@ -60,7 +64,7 @@ class CidadesPage extends StatelessWidget {
         title: Text(mocaoModel.nome),
         centerTitle: true,
       ),
-      body: _buildBody(usuarioController),
+      body: _buildBody(context, usuarioController),
     );
   }
 }
