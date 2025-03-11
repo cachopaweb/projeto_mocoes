@@ -6,7 +6,7 @@ class ConfigController {
   final ILocalStorage storage = LocalStorageService();
 
   Future<String> getUrlBase() async {
-    return 'http://localhost:8080/v1';
+    return 'https://backend-mocoes-fboxwqyjfq-rj.a.run.app/v1';
   }
 
   ConfigController._();

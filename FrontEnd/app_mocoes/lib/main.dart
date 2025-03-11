@@ -1,6 +1,8 @@
+import 'package:app_mocoes/models/candidatos_model.dart';
 import 'package:app_mocoes/models/cidades_model.dart';
 import 'package:app_mocoes/models/mocoes_model.dart';
 import 'package:app_mocoes/pages/cidades_page.dart';
+import 'package:app_mocoes/pages/historico_mocoes_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -38,10 +40,24 @@ class MyApp extends StatelessWidget {
               mocaoModel:
                   ModalRoute.of(context)!.settings.arguments as MocoesModel,
             ),
-        '/candidatos': (context) => CandidatosPage(
-              cidadesModel:
-                  ModalRoute.of(context)!.settings.arguments as CidadesModel,
-            ),
+        '/candidatos': (context) {
+          final arguments =
+              ModalRoute.of(context)!.settings.arguments as Map<String, Object>;
+
+          return CandidatosPage(
+            cidadesModel: arguments['cidade'] as CidadesModel,
+            mocoesModel: arguments['mocao'] as MocoesModel,
+          );
+        },
+        '/historico': (context) {
+          final arguments =
+              ModalRoute.of(context)!.settings.arguments as Map<String, Object>;
+
+          return HistoricoMocoesPage(
+            candidatosModel: arguments['candidato'] as CandidatosModel,
+            mocoesModel: arguments['mocao'] as MocoesModel,
+          );
+        },
       },
     );
   }

@@ -13,9 +13,11 @@ type
     class procedure Router;
     class procedure Get(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure GetForID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+    class procedure GetForCandidatoID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Post(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Put(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Delete(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+    class procedure GetForCidadeID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
   end;
 
 implementation
@@ -68,6 +70,67 @@ begin
   end;
 end;
 
+class procedure THistoricoMocoesController.GetForCandidatoID(Req: THorseRequest;
+  Res: THorseResponse; Next: TProc);
+var HistoricoMocoes: THistoricoMocoes;
+    aJson: TJSONArray;
+    id: Integer;
+  Query: iQuery;
+begin
+  aJson := TJSONArray.Create;
+  id := Req.Params.Items['id'].ToInteger();
+  Query := TDatabase.Query;
+  try
+    HistoricoMocoes := THistoricoMocoes.Create(TDatabase.Connection);
+    HistoricoMocoes.CriaTabela;
+    ////
+    Query.Add('SELECT HM_CODIGO FROM HISTORICO_MOCOES WHERE HM_COD_CANDIDATO = :CANDIDATO');
+    Query.AddParam('CANDIDATO', id);
+    Query.Open();
+    Query.Dataset.First;
+    while not Query.Dataset.Eof do
+    begin
+      HistoricoMocoes.BuscaDadosTabela(Query.Dataset.FieldByName('HM_CODIGO').AsInteger);
+      aJson.Add(HistoricoMocoes.ToJsonObject);
+      Query.Dataset.Next;
+    end;
+    Res.Send<TJSONArray>(aJson);
+  finally
+    HistoricoMocoes.DisposeOf;
+  end;
+end;
+
+class procedure THistoricoMocoesController.GetForCidadeID(Req: THorseRequest;
+  Res: THorseResponse; Next: TProc);
+var HistoricoMocoes: THistoricoMocoes;
+    aJson: TJSONArray;
+    id: Integer;
+  Query: iQuery;
+begin
+  aJson := TJSONArray.Create;
+  id := Req.Params.Items['id'].ToInteger();
+  Query := TDatabase.Query;
+  try
+    HistoricoMocoes := THistoricoMocoes.Create(TDatabase.Connection);
+    HistoricoMocoes.CriaTabela;
+    ////
+    Query.Add('SELECT FIRST 1 HM_CODIGO FROM HISTORICO_MOCOES JOIN CANDIDATOS ON HM_COD_CANDIDATO = CAN_CODIGO');
+		Query.Add('WHERE CAN_CID = :CIDADE');
+    Query.AddParam('CIDADE', id);
+    Query.Open();
+    Query.Dataset.First;
+    while not Query.Dataset.Eof do
+    begin
+      HistoricoMocoes.BuscaDadosTabela(Query.Dataset.FieldByName('HM_CODIGO').AsInteger);
+      aJson.Add(HistoricoMocoes.ToJsonObject);
+      Query.Dataset.Next;
+    end;
+    Res.Send<TJSONArray>(aJson);
+  finally
+    HistoricoMocoes.DisposeOf;
+  end;
+end;
+
 class procedure THistoricoMocoesController.GetForID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var HistoricoMocoes: THistoricoMocoes;
     aJson: TJSONArray;
@@ -91,6 +154,7 @@ begin
     HistoricoMocoes := THistoricoMocoes.Create(TDatabase.Connection).fromJson<THistoricoMocoes>(Req.Body);
     if HistoricoMocoes.Codigo = 0 then
         HistoricoMocoes.Codigo := GeraCodigo('HISTORICO_MOCOES', 'HM_CODIGO');
+    HistoricoMocoes.DataCriacao := Now;
     HistoricoMocoes.SalvaNoBanco(1);
     Res.Send<TJSONObject>(HistoricoMocoes.ToJsonObject);
   finally
@@ -124,6 +188,16 @@ begin
         .Route('/historicoMocoes/:id')
           .Get(GetForID)
           .Delete(Delete)
+        .&End
+        .Group
+        .Prefix('/v1')
+        .Route('/historicoMocoes/candidato/:id')
+          .Get(GetForCandidatoID)          
+        .&End
+        .Group
+        .Prefix('/v1')
+        .Route('/historicoMocoes/cidade/:id')
+          .Get(GetForCidadeID)          
         .&End
 end;
 

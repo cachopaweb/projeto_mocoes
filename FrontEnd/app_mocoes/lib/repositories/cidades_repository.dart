@@ -5,6 +5,7 @@ import 'options_dio.dart';
 
 class CidadesRepository {
   Future<List<CidadesModel>> fetchCidades(int estado) async {
+    if (estado == 0) return throw Exception('Estado não informado!');
     final options = OptionsDio();
     Dio dio = Dio(await options.getOptions());
     try {

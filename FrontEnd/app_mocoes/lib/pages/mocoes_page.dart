@@ -77,7 +77,7 @@ class _MocoesPageState extends State<MocoesPage> {
             elevation: 15,
             child: ListTile(
               subtitle: Text(
-                fmt.format(lista[index].dataCriacao),
+                'Data criação: ${fmt.format(lista[index].dataCriacao)}',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -154,7 +154,7 @@ class _MocoesPageState extends State<MocoesPage> {
           _buildSuccess(result.data!),
         (AsyncSnapshot<List<MocoesModel>> result) when !result.hasError =>
           _buildLoading(),
-        (_) => _buildError('Nada encontrado...'),
+        (_) => _buildError(snapshot.error.toString()),
       },
     );
   }

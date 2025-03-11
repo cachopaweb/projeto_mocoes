@@ -15,7 +15,7 @@ type
     FCodMocao: integer;
     FCodCandidato: integer;
     FDescricao: string;
-    FDataCriacao: string;
+    FDataCriacao: TDateTime;
     FCodUsuario: integer;
     FMocao: TMocoes;
     FCandidato: TCandidatos;
@@ -28,8 +28,8 @@ type
     property CodCandidato: integer read FCodCandidato write FCodCandidato;
     [TCampo('HM_DESCRICAO', 'VARCHAR(1000)')]
     property Descricao: string read FDescricao write FDescricao;
-    [TCampo('HM_DATA_CRIACAO', 'DATE')]
-    property DataCriacao: string read FDataCriacao write FDataCriacao;
+    [TCampo('HM_DATA_CRIACAO', 'TIMESTAMP')]
+    property DataCriacao: TDateTime read FDataCriacao write FDataCriacao;
     [TCampo('HM_COD_USUARIO', 'INTEGER')]
     property CodUsuario: integer read FCodUsuario write FCodUsuario; 
     [TRelacionamento('MOCOES', 'MOC_CODIGO', 'HM_COD_MOCAO', TMocoes, TTipoRelacionamento.UmPraUm)]

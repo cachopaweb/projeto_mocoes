@@ -1,4 +1,5 @@
 import 'package:app_mocoes/controllers/usuario_controller.dart';
+import 'package:app_mocoes/repositories/mocoes_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,6 +9,7 @@ import '../repositories/cidades_repository.dart';
 
 class CidadesPage extends StatelessWidget {
   final MocoesModel mocaoModel;
+  final historicoRepository = MocoesRepository();
   final respository = CidadesRepository();
 
   CidadesPage({super.key, required this.mocaoModel});
@@ -15,16 +17,35 @@ class CidadesPage extends StatelessWidget {
   _buildSuccess(BuildContext context, List<CidadesModel> lista) {
     return ListView.builder(
       itemCount: lista.length,
-      itemBuilder: (_, index) {
-        return GestureDetector(
-          onTap: () => Navigator.of(context)
-              .pushNamed('/candidatos', arguments: lista[index]),
-          child: Card(
-            elevation: 15,
-            child: ListTile(
-              title: Text(lista[index].nome),
-            ),
-          ),
+      itemBuilder: (context, index) {
+        return FutureBuilder(
+          future: historicoRepository
+              .fetchHistoricoMocoesPorCidade(lista[index].codigo),
+          builder: (context, snapshot) {
+            final hasHistorico =
+                snapshot.hasData && (snapshot.data?.isNotEmpty ?? false);
+            return GestureDetector(
+              onTap: () =>
+                  Navigator.of(context).pushNamed('/candidatos', arguments: {
+                'cidade': lista[index],
+                'mocao': mocaoModel,
+              }),
+              child: Card(
+                color: hasHistorico
+                    ? Theme.of(context).primaryColor
+                    : Colors.white,
+                elevation: 15,
+                child: ListTile(
+                  title: Text(
+                    lista[index].nome,
+                    style: TextStyle(
+                      color: hasHistorico ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -38,7 +59,7 @@ class CidadesPage extends StatelessWidget {
 
   _buildError(String error) {
     return Center(
-      child: Text('Erro ao buscar moções!\n$error'),
+      child: Text('Erro ao buscar cidades!\n$error'),
     );
   }
 
@@ -51,7 +72,7 @@ class CidadesPage extends StatelessWidget {
           _buildSuccess(context, result.data!),
         (AsyncSnapshot<List<MocoesModel>> result) when !result.hasError =>
           _buildLoading(),
-        (_) => _buildError('Nada encontrado...'),
+        (_) => _buildError(snapshot.error.toString()),
       },
     );
   }

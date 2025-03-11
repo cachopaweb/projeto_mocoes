@@ -23,6 +23,7 @@ type
     FPartido: string;
     FUrlCandidato: string;
     FVotos: string;
+    FCodCidade: integer;
   published
   	[TCampo('CAN_CODIGO', 'INTEGER NOT NULL PRIMARY KEY')]
   	property Codigo: integer read FCodigo write FCodigo;
@@ -44,6 +45,8 @@ type
     property UrlCandidato: string read FUrlCandidato write FUrlCandidato;
     [TCampo('CAN_VOTOS', 'VARCHAR(30)')]
     property Votos: string read FVotos write FVotos;
+    [TCampo('CAN_CID', 'INTEGER')]
+    property CodCidade: integer read FCodCidade write FCodCidade;
   end;
 	
 

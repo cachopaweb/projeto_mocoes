@@ -60,12 +60,16 @@ var
   JArrayCandidatos: TJSONArray;
   j: Integer;
   JsonObj: TJSONObject;
+  CodCidade: Integer;
 begin
-	if not Req.Query.ContainsKey('cidade') then
-  	raise Exception.Create('Cidade não informada!');
+	if not Req.Query.ContainsKey('cidadeDescricao') then
+  	raise Exception.Create('Descrição da Cidade não informada!');
+  if not Req.Query.ContainsKey('codCidade') then
+  	raise Exception.Create('Código da Cidade não informada!');
   if not Req.Query.ContainsKey('estado') then
   	raise Exception.Create('Estado não informada!');
-	Cidade := Req.Query.Items['cidade'];
+	Cidade := Req.Query.Items['cidadeDescricao'];
+  CodCidade := Req.Query.Items['codCidade'].ToInteger();
   Estado := Req.Query.Items['estado'];
   aJson := TJSONArray.Create;
   Query := TDatabase.Query;
@@ -73,7 +77,7 @@ begin
     Candidatos := TCandidatos.Create(TDatabase.Connection);
     Candidatos.CriaTabela;
     ////
-    Query.Open('SELECT FIRST 1 CAN_CODIGO FROM CANDIDATOS ORDER BY CAN_CODIGO');
+    Query.Open(Format('SELECT FIRST 1 CAN_CODIGO FROM CANDIDATOS WHERE CAN_CID = %d ORDER BY CAN_CODIGO', [CodCidade]));
     if Query.DataSet.IsEmpty then
     begin
       //busca na API caso nunca foi carregado
@@ -86,15 +90,16 @@ begin
           for j := 0 to Pred(JArrayCandidatos.Count) do
           begin
             Candidatos := Candidatos.fromJson<TCandidatos>(JArrayCandidatos.Items[j].ToJSON);
-            Candidatos.Codigo := j + 1;
-            Candidatos.SalvaNoBanco();
+            Candidatos.Codigo := GeraCodigo('CANDIDATOS', 'CAN_CODIGO');
+            Candidatos.CodCidade := CodCidade;
+      			Candidatos.SalvaNoBanco();
           end;
         finally
           JsonArray.Free;
         end;
       end;
     end;
-    Query.Open('SELECT CAN_CODIGO FROM CANDIDATOS ORDER BY CAN_CODIGO');
+    Query.Open(Format('SELECT CAN_CODIGO FROM CANDIDATOS WHERE CAN_CID = %d ORDER BY CAN_CODIGO', [CodCidade]));
     Query.Dataset.First;
     while not Query.Dataset.Eof do
     begin
