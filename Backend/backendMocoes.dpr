@@ -18,13 +18,14 @@ uses
   UnitCidades.Model in 'src\Modulos\Cidades\UnitCidades.Model.pas',
   UnitEstados.Controller in 'src\Modulos\Estados\UnitEstados.Controller.pas',
   UnitEstados.Model in 'src\Modulos\Estados\UnitEstados.Model.pas',
-  UnitCandidatos.Model in 'src\Modulos\Candidatos\UnitCandidatos.Model.pas',
-  UnitCandidatos.Controller in 'src\Modulos\Candidatos\UnitCandidatos.Controller.pas',
   UnitMocoes.Model in 'src\Modulos\Mocoes\UnitMocoes.Model.pas',
   UnitMocoes.Controller in 'src\Modulos\Mocoes\UnitMocoes.Controller.pas',
   UnitHistoricoMocoes.Model in 'src\Modulos\Historico\UnitHistoricoMocoes.Model.pas',
   UnitHistoricoMocoes.Controller in 'src\Modulos\Historico\UnitHistoricoMocoes.Controller.pas',
-  UnitUsuarios.Model in 'src\Modulos\Usuarios\UnitUsuarios.Model.pas';
+  UnitUsuarios.Model in 'src\Modulos\Usuarios\UnitUsuarios.Model.pas',
+  UnitCidadesMocoes.Model in 'src\Modulos\CidadesMocoes\UnitCidadesMocoes.Model.pas',
+  UnitVereadores.Controller in 'src\Modulos\Vereadores\UnitVereadores.Controller.pas',
+  UnitVereadores.Model in 'src\Modulos\Vereadores\UnitVereadores.Model.pas';
 
 var
 	Porta: integer;
@@ -38,7 +39,7 @@ begin
  	TLoginController.Router;
   TEstadosController.Router;
   TCidadesController.Router;
-  TCandidatosController.Router;
+  TVereadoresController.Router;
   TMocoesController.Router;
   THistoricoMocoesController.Router;
     

@@ -28,15 +28,14 @@ class MocoesRepository {
     }
   }
 
-  Future<List<HistoricoMocoesModel>> fetchHistoricoMocoes(
-      int codCandidato) async {
+  Future<HistoricoMocoesModel> fetchHistoricoMocoesPorId(
+      int codHistorico) async {
     final options = OptionsDio();
     Dio dio = Dio(await options.getOptions());
     try {
-      final response =
-          await dio.get('/historicoMocoes/candidato/$codCandidato');
-      final lista = response.data as List;
-      return lista.map((e) => HistoricoMocoesModel.fromMap(e)).toList();
+      final response = await dio.get('/historicoMocoes/$codHistorico');
+      return HistoricoMocoesModel.fromMap(
+          response.data as Map<String, dynamic>);
     } catch (e) {
       throw Exception(e);
     }

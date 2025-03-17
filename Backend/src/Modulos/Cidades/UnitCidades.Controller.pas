@@ -27,7 +27,7 @@ uses
   UnitDatabase,
   UnitFunctions,
   UnitCidades.Model,
-  UnitTabela.Helper.Json;
+  UnitTabela.Helper.Json, UnitHistoricoMocoes.Model, UnitCidadesMocoes.Model;
 
 class procedure TCidadesController.Delete(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var Cidades: TCidades;
@@ -48,6 +48,8 @@ var Cidades: TCidades;
     aJson: TJSONArray;
     Query: iQuery;
   Estado: Integer;
+  oJson: TJSONObject;
+  CidadesMocoes: TCidadesMocoes;
 begin
   aJson := TJSONArray.Create;
   if not Req.Query.ContainsKey('estado') then  
@@ -55,15 +57,30 @@ begin
   Estado := Req.Query.Items['estado'].ToInteger;
   Query := TDatabase.Query;
   try
+  	CidadesMocoes := TCidadesMocoes.Create(TDatabase.Connection);
+    try
+      CidadesMocoes.CriaTabela;
+    finally
+      CidadesMocoes.DisposeOf;
+    end;
     Cidades := TCidades.Create(TDatabase.Connection);
     Cidades.CriaTabela;
     ////
-    Query.Open(Format('SELECT CID_CODIGO FROM CIDADES WHERE CID_EST = %d ORDER BY CID_NOME', [Estado]));
+    Query.Add('SELECT CID_CODIGO, CID_UF, CID_CODIGO_IBGE, CID_EST, CID_NOME, CM_STATUS ');
+    Query.Add('FROM CIDADES LEFT JOIN CIDADES_MOCOES ON CID_CODIGO = CM_CID WHERE CID_EST = :ESTADO ORDER BY CID_NOME');
+    Query.AddParam('ESTADO', Estado);
+    Query.Open();
     Query.Dataset.First;
     while not Query.Dataset.Eof do
     begin
-      Cidades.BuscaDadosTabela(Query.Dataset.FieldByName('CID_CODIGO').AsInteger);
-      aJson.Add(Cidades.ToJsonObject);
+      oJson := TJSONObject.Create;
+      oJson.AddPair('codigo', TJSONNumber.Create(Query.DataSet.FieldByName('CID_CODIGO').AsInteger));
+      oJson.AddPair('uf', Query.DataSet.FieldByName('CID_UF').AsString);
+      oJson.AddPair('codigo_ibge', TJSONNumber.Create(Query.DataSet.FieldByName('CID_CODIGO_IBGE').AsInteger));
+      oJson.AddPair('est', TJSONNumber.Create(Query.DataSet.FieldByName('CID_EST').AsInteger));
+      oJson.AddPair('nome', Query.DataSet.FieldByName('CID_NOME').AsString);
+      oJson.AddPair('status', Query.DataSet.FieldByName('CM_STATUS').AsString);
+      aJson.Add(oJson);
       Query.Dataset.Next;
     end;
     Res.Send<TJSONArray>(aJson);

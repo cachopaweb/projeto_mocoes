@@ -1,57 +1,115 @@
-import 'package:app_mocoes/controllers/usuario_controller.dart';
-import 'package:app_mocoes/models/candidatos_model.dart';
-import 'package:app_mocoes/models/mocoes_model.dart';
+import 'package:app_mocoes/controllers/historico_mocoes_controller.dart';
+import 'package:app_mocoes/models/vereadores_model.dart';
+import 'package:app_mocoes/repositories/vereadores_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../components/datePicker.dart';
+import '../components/dropDownStatus.dart';
+import '../components/dropDownVereadores.dart';
+import '../controllers/usuario_controller.dart';
+import '../models/cidades_model.dart';
 import '../models/historico_mocoes_model.dart';
+import '../models/mocoes_model.dart';
 import '../repositories/mocoes_repository.dart';
+import '../utils/utils.dart';
+import 'detalhe_historico_mocoes_page.dart';
 
 class HistoricoMocoesPage extends StatefulWidget {
-  final CandidatosModel candidatosModel;
+  final CidadesModel cidadesModel;
   final MocoesModel mocoesModel;
 
-  const HistoricoMocoesPage(
-      {super.key, required this.candidatosModel, required this.mocoesModel});
+  const HistoricoMocoesPage({
+    super.key,
+    required this.mocoesModel,
+    required this.cidadesModel,
+  });
 
   @override
   State<HistoricoMocoesPage> createState() => _HistoricoMocoesPageState();
 }
 
 class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
-  final respository = MocoesRepository();
+  final repository = MocoesRepository();
+  final repositoryVereadores = VereadoresRepository();
 
-  final descricaoController = TextEditingController();
+  _vaiParaDetalhes(HistoricoMocoesModel model) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: DetalheHistoricoMocoesPage(
+            historicoMocoesModel: model,
+          ),
+        );
+      },
+    );
+  }
 
   _buildSuccess(List<HistoricoMocoesModel> lista) {
     final dateFmt = DateFormat('dd/MM/yyyy hh:mm:ss');
     return ListView.builder(
       itemCount: lista.length,
       itemBuilder: (_, index) {
-        return Card(
-          elevation: 15,
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              children: [
-                Text(
-                  lista[index].descricao,
-                  maxLines: lista[index].descricao.length,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Data criação: ${dateFmt.format(lista[index].dataCriacao)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
+        final historico = lista[index];
+        return FutureBuilder(
+            future: repositoryVereadores.fetchVereador(historico.codVereador),
+            builder: (context, snapshot) {
+              final hasData = snapshot.hasData;
+              var vereador = VereadoresModel.empty();
+              if (hasData) {
+                vereador = snapshot.data!;
+              }
+              return hasData
+                  ? GestureDetector(
+                      onTap: () => _vaiParaDetalhes(lista[index]),
+                      child: Container(
+                        margin: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                          border: Border.all(
+                            width: 3,
+                            color:
+                                strToStatus(lista[index].status).StatusToColor,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                lista[index].status,
+                                style: TextStyle(
+                                    color: strToStatus(lista[index].status)
+                                        .StatusToColor),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                vereador.nome,
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                'Data Status: ${dateFmt.format(lista[index].dataStatus)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : const CircularProgressIndicator();
+            });
       },
     );
   }
@@ -75,8 +133,7 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
         return AlertDialog(
           title: const Text('Histórico de Moções'),
           content: TelaCadastroHistoricoMocoes(
-            descricaoController: descricaoController,
-            historicoMocoesModel: HistoricoMocoesModel.empty(),
+            cidadesModel: widget.cidadesModel,
           ),
           actions: [
             TextButton(
@@ -113,13 +170,14 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
 
   _buildBody() {
     return FutureBuilder(
-      future: respository.fetchHistoricoMocoes(widget.candidatosModel.codigo),
+      future:
+          repository.fetchHistoricoMocoesPorCidade(widget.cidadesModel.codigo),
       builder: (context, snapshot) => switch (snapshot) {
         (AsyncSnapshot<List<HistoricoMocoesModel>> result)
             when result.hasData =>
           _buildSuccess(result.data!),
         (AsyncSnapshot<List<HistoricoMocoesModel>> result)
-            when !result.hasError =>
+            when (result.connectionState == ConnectionState.waiting) =>
           _buildLoading(),
         (_) => _buildError(snapshot.error.toString()),
       },
@@ -136,7 +194,7 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.candidatosModel.nome),
+        title: Text(widget.cidadesModel.nome),
         centerTitle: true,
       ),
       body: _buildBody(),
@@ -144,18 +202,22 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
         onPressed: () async {
           final controllerUsuario =
               Provider.of<UsuarioController>(context, listen: false);
+          final historicoController =
+              Provider.of<HistoricoMocoesController>(context, listen: false);
           final result = await _buildModalCadastroHistoricoMocoes(context);
           if (result) {
             final historicoMocoesModel = HistoricoMocoesModel(
               codigo: 0,
-              descricao: descricaoController.text,
+              descricao: historicoController.getDescricao(),
               dataCriacao: DateTime.now(),
-              codCandidato: widget.candidatosModel.codigo,
+              codVereador: historicoController.getVereador().codigo,
               codMocao: widget.mocoesModel.codigo,
               codUsuario: controllerUsuario.usuarioLogado.codigo,
+              status: historicoController.getStatus().StatusToStr,
+              dataStatus: historicoController.getDataStatus(),
             );
             final resultInsereHistorico =
-                await respository.createHistoricoMocoes(historicoMocoesModel);
+                await repository.createHistoricoMocoes(historicoMocoesModel);
             if (resultInsereHistorico) {
               if (mounted) {
                 // ignore: use_build_context_synchronously
@@ -175,13 +237,11 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
 }
 
 class TelaCadastroHistoricoMocoes extends StatefulWidget {
-  final TextEditingController descricaoController;
-  final HistoricoMocoesModel historicoMocoesModel;
+  final CidadesModel cidadesModel;
 
   const TelaCadastroHistoricoMocoes({
     super.key,
-    required this.descricaoController,
-    required this.historicoMocoesModel,
+    required this.cidadesModel,
   });
 
   @override
@@ -190,31 +250,80 @@ class TelaCadastroHistoricoMocoes extends StatefulWidget {
 }
 
 class _TelaCadastroMocoesState extends State<TelaCadastroHistoricoMocoes> {
+  final _controllerDescricao = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    widget.descricaoController.text = widget.historicoMocoesModel.descricao;
-    widget.descricaoController.addListener(() => widget
-        .historicoMocoesModel.descricao = widget.descricaoController.text);
+  }
+
+  @override
+  void dispose() {
+    _controllerDescricao.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controllerHistorico =
+        Provider.of<HistoricoMocoesController>(context, listen: false);
     return SizedBox(
-      height: 300,
       child: Card(
-        child: Form(
-          child: Column(
-            children: [
-              const Text('Histórico'),
-              TextFormField(
-                maxLines: 10,
-                controller: widget.descricaoController,
-                decoration: const InputDecoration(
-                    hintText: 'Informe o histórico da moção',
-                    border: OutlineInputBorder()),
-              ),
-            ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            child: Column(
+              children: [
+                Dropdownvereadores(
+                  cidadesModel: widget.cidadesModel,
+                  codEstado: widget.cidadesModel.est,
+                  onChanged: (String? value) async {
+                    final repositoryVereadores = VereadoresRepository();
+                    final listaVereadores =
+                        await repositoryVereadores.fetchVereadores(
+                            widget.cidadesModel.est, widget.cidadesModel);
+                    final vereador =
+                        listaVereadores.firstWhere((e) => e.nome == value);
+                    controllerHistorico.setVereador(vereador);
+                  },
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Dropdownstatus(
+                  onChanged: (String? value) {
+                    final status = listaStatus.firstWhere((st) => st == value);
+                    controllerHistorico.setStatus(strToStatus(status));
+                  },
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Datepicker(
+                  onChanged: (String? value) {
+                    if (value != null && value.isNotEmpty) {
+                      controllerHistorico.setDataStatus(DateTime.parse(value));
+                    }
+                  },
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const Text('Histórico'),
+                TextFormField(
+                  maxLines: 10,
+                  controller: _controllerDescricao,
+                  decoration: const InputDecoration(
+                      hintText: 'Informe o histórico da moção',
+                      border: OutlineInputBorder()),
+                  onChanged: (String? value) {
+                    if (value != null && value.isNotEmpty) {
+                      controllerHistorico.setDescricao(value);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

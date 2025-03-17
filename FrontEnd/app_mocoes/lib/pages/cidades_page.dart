@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/cidades_model.dart';
 import '../models/mocoes_model.dart';
 import '../repositories/cidades_repository.dart';
+import '../utils/utils.dart';
 
 class CidadesPage extends StatelessWidget {
   final MocoesModel mocaoModel;
@@ -18,34 +19,38 @@ class CidadesPage extends StatelessWidget {
     return ListView.builder(
       itemCount: lista.length,
       itemBuilder: (context, index) {
-        return FutureBuilder(
-          future: historicoRepository
-              .fetchHistoricoMocoesPorCidade(lista[index].codigo),
-          builder: (context, snapshot) {
-            final hasHistorico =
-                snapshot.hasData && (snapshot.data?.isNotEmpty ?? false);
-            return GestureDetector(
-              onTap: () =>
-                  Navigator.of(context).pushNamed('/candidatos', arguments: {
-                'cidade': lista[index],
-                'mocao': mocaoModel,
-              }),
-              child: Card(
-                color: hasHistorico
-                    ? Theme.of(context).primaryColor
-                    : Colors.white,
-                elevation: 15,
-                child: ListTile(
-                  title: Text(
-                    lista[index].nome,
-                    style: TextStyle(
-                      color: hasHistorico ? Colors.white : Colors.black,
-                    ),
-                  ),
+        return GestureDetector(
+          onTap: () =>
+              Navigator.of(context).pushNamed('/historico', arguments: {
+            'cidade': lista[index],
+            'mocao': mocaoModel,
+          }),
+          child: Container(
+            margin: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(8.0),
+              ),
+              border: Border.all(
+                width: 3,
+                color: strToStatus(lista[index].status).StatusToColor,
+              ),
+            ),
+            child: ListTile(
+              title: Text(
+                lista[index].nome,
+                style: const TextStyle(
+                  color: Colors.black,
                 ),
               ),
-            );
-          },
+              subtitle: Text(
+                lista[index].status,
+                style: TextStyle(
+                  color: strToStatus(lista[index].status).StatusToColor,
+                ),
+              ),
+            ),
+          ),
         );
       },
     );
@@ -70,9 +75,12 @@ class CidadesPage extends StatelessWidget {
       builder: (context, snapshot) => switch (snapshot) {
         (AsyncSnapshot<List<CidadesModel>> result) when result.hasData =>
           _buildSuccess(context, result.data!),
-        (AsyncSnapshot<List<MocoesModel>> result) when !result.hasError =>
+        (AsyncSnapshot<List<MocoesModel>> result)
+            when (result.connectionState == ConnectionState.waiting) =>
           _buildLoading(),
-        (_) => _buildError(snapshot.error.toString()),
+        (AsyncSnapshot<List<MocoesModel>> result) when (result.hasError) =>
+          _buildError(snapshot.error.toString()),
+        (_) => _buildLoading(),
       },
     );
   }

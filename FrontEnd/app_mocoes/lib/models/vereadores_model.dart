@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class CandidatosModel {
+class VereadoresModel {
   final int codigo;
   final String nome;
   final int? classificacao;
@@ -13,7 +13,7 @@ class CandidatosModel {
   final String? urlCandidato;
   final String? votos;
 
-  CandidatosModel(
+  VereadoresModel(
       {required this.codigo,
       required this.nome,
       this.classificacao,
@@ -40,8 +40,8 @@ class CandidatosModel {
     };
   }
 
-  factory CandidatosModel.fromMap(Map<String, dynamic> map) {
-    return CandidatosModel(
+  factory VereadoresModel.fromMap(Map<String, dynamic> map) {
+    return VereadoresModel(
       codigo: map['codigo'] as int,
       nome: map['nome'] as String,
       classificacao:
@@ -61,6 +61,9 @@ class CandidatosModel {
 
   String toJson() => json.encode(toMap());
 
-  factory CandidatosModel.fromJson(String source) =>
-      CandidatosModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory VereadoresModel.fromJson(String source) =>
+      VereadoresModel.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  factory VereadoresModel.empty() =>
+      VereadoresModel(codigo: 0, nome: '', foto: '');
 }

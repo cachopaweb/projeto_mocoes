@@ -13,7 +13,7 @@ type
     class procedure Router;
     class procedure Get(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure GetForID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
-    class procedure GetForCandidatoID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
+    class procedure GetForVereadorID(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Post(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Put(Req: THorseRequest; Res: THorseResponse; Next: TProc);
     class procedure Delete(Req: THorseRequest; Res: THorseResponse; Next: TProc);
@@ -29,7 +29,7 @@ uses
   UnitDatabase,
   UnitFunctions,
   UnitHistoricoMocoes.Model,
-  UnitTabela.Helper.Json;
+  UnitTabela.Helper.Json, UnitCidadesMocoes.Model, UnitVereadores.Model;
 
 class procedure THistoricoMocoesController.Delete(Req: THorseRequest; Res: THorseResponse; Next: TProc);
 var HistoricoMocoes: THistoricoMocoes;
@@ -70,7 +70,7 @@ begin
   end;
 end;
 
-class procedure THistoricoMocoesController.GetForCandidatoID(Req: THorseRequest;
+class procedure THistoricoMocoesController.GetForVereadorID(Req: THorseRequest;
   Res: THorseResponse; Next: TProc);
 var HistoricoMocoes: THistoricoMocoes;
     aJson: TJSONArray;
@@ -114,8 +114,8 @@ begin
     HistoricoMocoes := THistoricoMocoes.Create(TDatabase.Connection);
     HistoricoMocoes.CriaTabela;
     ////
-    Query.Add('SELECT FIRST 1 HM_CODIGO FROM HISTORICO_MOCOES JOIN CANDIDATOS ON HM_COD_CANDIDATO = CAN_CODIGO');
-		Query.Add('WHERE CAN_CID = :CIDADE');
+    Query.Add('SELECT HM_CODIGO FROM HISTORICO_MOCOES JOIN VEREADORES ON HM_COD_VEREADOR = VER_CODIGO');
+		Query.Add('WHERE VER_CID = :CIDADE');
     Query.AddParam('CIDADE', id);
     Query.Open();
     Query.Dataset.First;
@@ -148,7 +148,11 @@ begin
 end;
 
 class procedure THistoricoMocoesController.Post(Req: THorseRequest; Res: THorseResponse; Next: TProc);
-var HistoricoMocoes: THistoricoMocoes;
+var 
+	HistoricoMocoes: THistoricoMocoes;
+  CidadesMocoes: TCidadesMocoes;
+  Query: iQuery;
+  Vereador: TVereadores;
 begin
   try
     HistoricoMocoes := THistoricoMocoes.Create(TDatabase.Connection).fromJson<THistoricoMocoes>(Req.Body);
@@ -156,6 +160,23 @@ begin
         HistoricoMocoes.Codigo := GeraCodigo('HISTORICO_MOCOES', 'HM_CODIGO');
     HistoricoMocoes.DataCriacao := Now;
     HistoricoMocoes.SalvaNoBanco(1);
+    //busca cidade vereador
+    Vereador := TVereadores.Create(TDatabase.Connection);
+    CidadesMocoes := TCidadesMocoes.Create(TDatabase.Connection);
+    try
+      Vereador.CriaTabela;
+      Vereador.BuscaDadosTabela(HistoricoMocoes.CodVereador);
+	    //atualiza ou cria o registro de ligação de moções com cidades
+      CidadesMocoes.CriaTabela;
+			CidadesMocoes.Codigo    := Vereador.CodCidade;
+			CidadesMocoes.CodCidade := Vereador.CodCidade;
+			CidadesMocoes.CodMocao  := HistoricoMocoes.CodMocao;
+			CidadesMocoes.Status    := HistoricoMocoes.Status;
+      CidadesMocoes.SalvaNoBanco();
+		finally
+      Vereador.DisposeOf;
+      CidadesMocoes.DisposeOf;    	
+    end;
     Res.Send<TJSONObject>(HistoricoMocoes.ToJsonObject);
   finally
     HistoricoMocoes.DisposeOf;
@@ -191,8 +212,8 @@ begin
         .&End
         .Group
         .Prefix('/v1')
-        .Route('/historicoMocoes/candidato/:id')
-          .Get(GetForCandidatoID)          
+        .Route('/historicoMocoes/vereador/:id')
+          .Get(GetForVereadorID)          
         .&End
         .Group
         .Prefix('/v1')

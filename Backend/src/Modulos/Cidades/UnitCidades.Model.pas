@@ -20,6 +20,7 @@ type
     FCodigo_ibge: integer;
     FEst: integer;
     FNome: string;
+    FUltStatus: string;
   public
     { public declarations }
     [TCampo('CID_CODIGO', 'INTEGER NOT NULL PRIMARY KEY')]
@@ -32,6 +33,7 @@ type
     property Est: integer read FEst write FEst;
     [TCampo('CID_NOME', 'VARCHAR(100)')]
     property Nome: string read FNome write FNome;
+    property UltStatus: string read FUltStatus write FUltStatus;
   end;
 
 implementation

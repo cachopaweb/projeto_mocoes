@@ -6,8 +6,8 @@
         <MainSource>backendMocoes.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <TargetedPlatforms>1</TargetedPlatforms>
+        <Platform Condition="'$(Platform)'==''">Linux64</Platform>
+        <TargetedPlatforms>129</TargetedPlatforms>
         <AppType>Console</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -31,6 +31,12 @@
     <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
         <Cfg_1>true</Cfg_1>
         <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Linux64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Linux64)'!=''">
+        <Cfg_1_Linux64>true</Cfg_1_Linux64>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
@@ -87,6 +93,11 @@
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_Linux64)'!=''">
+        <DCC_ExeOutput>./dist</DCC_ExeOutput>
+        <Debugger_Launcher>/usr/bin/xterm -e &quot;%debuggee%&quot;</Debugger_Launcher>
+        <Manifest_File>(None)</Manifest_File>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -110,13 +121,14 @@
         <DCCReference Include="src\Modulos\Cidades\UnitCidades.Model.pas"/>
         <DCCReference Include="src\Modulos\Estados\UnitEstados.Controller.pas"/>
         <DCCReference Include="src\Modulos\Estados\UnitEstados.Model.pas"/>
-        <DCCReference Include="src\Modulos\Candidatos\UnitCandidatos.Model.pas"/>
-        <DCCReference Include="src\Modulos\Candidatos\UnitCandidatos.Controller.pas"/>
         <DCCReference Include="src\Modulos\Mocoes\UnitMocoes.Model.pas"/>
         <DCCReference Include="src\Modulos\Mocoes\UnitMocoes.Controller.pas"/>
         <DCCReference Include="src\Modulos\Historico\UnitHistoricoMocoes.Model.pas"/>
         <DCCReference Include="src\Modulos\Historico\UnitHistoricoMocoes.Controller.pas"/>
         <DCCReference Include="src\Modulos\Usuarios\UnitUsuarios.Model.pas"/>
+        <DCCReference Include="src\Modulos\CidadesMocoes\UnitCidadesMocoes.Model.pas"/>
+        <DCCReference Include="src\Modulos\Vereadores\UnitVereadores.Controller.pas"/>
+        <DCCReference Include="src\Modulos\Vereadores\UnitVereadores.Model.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -160,6 +172,12 @@
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx32\libcgsqlite3.dylib" Class="DependencyModule">
                     <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="dist\backendMocoes" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Linux64">
+                        <RemoteName>backendMocoes</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -586,7 +604,7 @@
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
-                <Platform value="Linux64">False</Platform>
+                <Platform value="Linux64">True</Platform>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
             </Platforms>

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../utils/utils.dart';
+
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class CidadesModel {
   int codigo;
@@ -7,6 +9,7 @@ class CidadesModel {
   int codigoIbge;
   int est;
   String nome;
+  String status;
 
   CidadesModel({
     required this.codigo,
@@ -14,6 +17,7 @@ class CidadesModel {
     required this.codigoIbge,
     required this.est,
     required this.nome,
+    required this.status,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +27,7 @@ class CidadesModel {
       'codigo_ibge': codigoIbge,
       'est': est,
       'nome': nome,
+      'status': status,
     };
   }
 
@@ -33,6 +38,9 @@ class CidadesModel {
       codigoIbge: map['codigo_ibge'] as int,
       est: map['est'] as int,
       nome: map['nome'] as String,
+      status: ((map['status'] != null && (map['status']).isNotEmpty)
+          ? map['status']
+          : Status.semContato.StatusToStr) as String,
     );
   }
 

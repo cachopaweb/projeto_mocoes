@@ -7,6 +7,7 @@ class ConfigController {
 
   Future<String> getUrlBase() async {
     return 'https://backend-mocoes-fboxwqyjfq-rj.a.run.app/v1';
+    // return 'http://localhost:8080/v1';
   }
 
   ConfigController._();
