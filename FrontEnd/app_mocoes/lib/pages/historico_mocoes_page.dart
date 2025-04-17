@@ -73,7 +73,7 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
                           border: Border.all(
                             width: 3,
                             color:
-                                strToStatus(lista[index].status).StatusToColor,
+                                strToStatus(lista[index].status).statusToColor,
                           ),
                         ),
                         child: Padding(
@@ -85,7 +85,7 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
                                 lista[index].status,
                                 style: TextStyle(
                                     color: strToStatus(lista[index].status)
-                                        .StatusToColor),
+                                        .statusToColor),
                               ),
                               const SizedBox(
                                 height: 10,
@@ -217,7 +217,7 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
               codVereador: historicoController.getVereador().codigo,
               codMocao: widget.mocoesModel.codigo,
               codUsuario: controllerUsuario.usuarioLogado.codigo,
-              status: historicoController.getStatus().StatusToStr,
+              status: historicoController.getStatus().statusToStr,
               dataStatus: historicoController.getDataStatus(),
             );
             final resultInsereHistorico =

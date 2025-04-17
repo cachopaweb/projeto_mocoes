@@ -27,7 +27,7 @@ class _DetalheHistoricoMocoesPageState
         ),
         border: Border.all(
           width: 3,
-          color: strToStatus(model.status).StatusToColor,
+          color: strToStatus(model.status).statusToColor,
         ),
       ),
       child: Padding(
@@ -37,7 +37,7 @@ class _DetalheHistoricoMocoesPageState
           children: [
             Text(
               model.status,
-              style: TextStyle(color: strToStatus(model.status).StatusToColor),
+              style: TextStyle(color: strToStatus(model.status).statusToColor),
             ),
             const SizedBox(
               height: 10,

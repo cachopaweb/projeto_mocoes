@@ -40,7 +40,7 @@ class CidadesModel {
       nome: map['nome'] as String,
       status: ((map['status'] != null && (map['status']).isNotEmpty)
           ? map['status']
-          : Status.semContato.StatusToStr) as String,
+          : Status.semContato.statusToStr) as String,
     );
   }
 

@@ -60,7 +60,7 @@ List<String> listaStatus = [
 ];
 
 extension StatusExtension on Status {
-  String get StatusToStr {
+  String get statusToStr {
     switch (this) {
       case Status.semContato:
         return 'SEM CONTATO';
@@ -76,29 +76,25 @@ extension StatusExtension on Status {
         return 'VOTAÇÃO MARCADA';
       case Status.aprovada:
         return 'APROVADA';
-      default:
-        return 'SEM CONTATO';
     }
   }
 
-  MaterialColor get StatusToColor {
+  Color get statusToColor {
     switch (this) {
       case Status.semContato:
         return Colors.grey;
       case Status.contatoInicial:
-        return Colors.blue;
+        return const Color(0xFFffeb9c);
       case Status.agendarRetorno:
-        return Colors.brown;
+        return const Color(0xFFc6efce);
       case Status.reuniaoInicialMarcada:
         return Colors.cyan;
       case Status.agendarMarcarVotacao:
-        return Colors.deepOrange;
+        return const Color(0xFFffc7ce);
       case Status.votacaoMarcada:
         return Colors.indigo;
       case Status.aprovada:
-        return Colors.green;
-      default:
-        return Colors.blue;
+        return const Color(0xFF06ee2d);
     }
   }
 }

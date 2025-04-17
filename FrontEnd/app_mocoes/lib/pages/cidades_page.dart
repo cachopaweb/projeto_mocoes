@@ -33,7 +33,7 @@ class CidadesPage extends StatelessWidget {
               ),
               border: Border.all(
                 width: 3,
-                color: strToStatus(lista[index].status).StatusToColor,
+                color: strToStatus(lista[index].status).statusToColor,
               ),
             ),
             child: ListTile(
@@ -46,7 +46,7 @@ class CidadesPage extends StatelessWidget {
               subtitle: Text(
                 lista[index].status,
                 style: TextStyle(
-                  color: strToStatus(lista[index].status).StatusToColor,
+                  color: strToStatus(lista[index].status).statusToColor,
                 ),
               ),
             ),
