@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:app_mocoes/controllers/historico_mocoes_controller.dart';
 import 'package:app_mocoes/models/cidades_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../Services/Local_storage.Service.dart';
 import '../models/vereadores_model.dart';
@@ -10,12 +12,10 @@ import '../repositories/vereadores_repository.dart';
 class Dropdownvereadores extends StatefulWidget {
   final CidadesModel cidadesModel;
   final int codEstado;
-  final void Function(String?)? onChanged;
   const Dropdownvereadores({
     super.key,
     required this.cidadesModel,
     required this.codEstado,
-    required this.onChanged,
   });
 
   @override
@@ -89,6 +89,15 @@ class _DropdownvereadoresState extends State<Dropdownvereadores> {
     );
   }
 
+  void onChangeVereador(String? value) {
+    dropdownValue.value = value!;
+    final controllerHistorico =
+        Provider.of<HistoricoMocoesController>(context, listen: false);
+    final vereador = listaVereadores.firstWhere(
+        (vereador) => vereador.nome.toUpperCase() == value.toUpperCase());
+    controllerHistorico.setVereador(vereador);
+  }
+
   Widget _buildSuccess() {
     return dropdownValue.value.isNotEmpty
         ? SizedBox(
@@ -101,27 +110,31 @@ class _DropdownvereadoresState extends State<Dropdownvereadores> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                DropdownButton<String>(
-                  value: dropdownValue.value,
-                  elevation: 14,
-                  alignment: Alignment.center,
-                  isExpanded: true,
-                  style: const TextStyle(color: Colors.white),
-                  items: listaVereadores
-                      .map(
-                        (model) => DropdownMenuItem<String>(
-                          alignment: Alignment.center,
-                          value: model.nome,
-                          child: Text(
-                            model.nome,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: widget.onChanged,
-                ),
+                ValueListenableBuilder<String>(
+                    valueListenable: dropdownValue,
+                    builder: (context, value, snapshot) {
+                      return DropdownButton<String>(
+                        value: value,
+                        elevation: 14,
+                        alignment: Alignment.center,
+                        isExpanded: true,
+                        style: const TextStyle(color: Colors.white),
+                        items: listaVereadores
+                            .map(
+                              (model) => DropdownMenuItem<String>(
+                                alignment: Alignment.center,
+                                value: model.nome,
+                                child: Text(
+                                  model.nome,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: onChangeVereador,
+                      );
+                    }),
               ],
             ),
           )

@@ -116,7 +116,11 @@ class _HistoricoMocoesPageState extends State<HistoricoMocoesPage> {
 
   _buildLoading() {
     return const Center(
-      child: CircularProgressIndicator(),
+      child: SizedBox(
+        height: 50,
+        width: 50,
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 
@@ -277,25 +281,11 @@ class _TelaCadastroMocoesState extends State<TelaCadastroHistoricoMocoes> {
                 Dropdownvereadores(
                   cidadesModel: widget.cidadesModel,
                   codEstado: widget.cidadesModel.est,
-                  onChanged: (String? value) async {
-                    final repositoryVereadores = VereadoresRepository();
-                    final listaVereadores =
-                        await repositoryVereadores.fetchVereadores(
-                            widget.cidadesModel.est, widget.cidadesModel);
-                    final vereador =
-                        listaVereadores.firstWhere((e) => e.nome == value);
-                    controllerHistorico.setVereador(vereador);
-                  },
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-                Dropdownstatus(
-                  onChanged: (String? value) {
-                    final status = listaStatus.firstWhere((st) => st == value);
-                    controllerHistorico.setStatus(strToStatus(status));
-                  },
-                ),
+                const Dropdownstatus(),
                 const SizedBox(
                   height: 10,
                 ),

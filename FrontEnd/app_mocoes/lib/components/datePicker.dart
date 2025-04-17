@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:app_mocoes/controllers/historico_mocoes_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class Datepicker extends StatefulWidget {
   final void Function(String)? onChanged;
@@ -22,13 +24,17 @@ class _DatePickerExampleState extends State<Datepicker> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2025),
       lastDate: DateTime(2030),
     );
-
-    setState(() {
-      selectedDate = pickedDate;
-    });
+    if (mounted) {
+      final historicoMocoesController =
+          Provider.of<HistoricoMocoesController>(context, listen: false);
+      setState(() {
+        selectedDate = pickedDate;
+        historicoMocoesController.setDataStatus(selectedDate!);
+      });
+    }
   }
 
   @override

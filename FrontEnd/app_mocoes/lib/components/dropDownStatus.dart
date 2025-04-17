@@ -1,14 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:app_mocoes/controllers/historico_mocoes_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../utils/utils.dart';
 
 class Dropdownstatus extends StatefulWidget {
-  final void Function(String?)? onChanged;
-  const Dropdownstatus({
-    super.key,
-    required this.onChanged,
-  });
+  const Dropdownstatus({super.key});
 
   @override
   State<Dropdownstatus> createState() => _DropDownEstadosState();
@@ -51,6 +49,17 @@ class _DropDownEstadosState extends State<Dropdownstatus> {
     );
   }
 
+  void onChangeStatus(String? value) {
+    final controllerHistorico =
+        Provider.of<HistoricoMocoesController>(context, listen: false);
+    final status = listaStatus
+        .firstWhere((st) => st.toUpperCase() == value!.toUpperCase());
+    controllerHistorico.setStatus(strToStatus(status));
+    setState(() {
+      dropdownValue = status;
+    });
+  }
+
   Widget _buildSuccess() {
     return dropdownValue.isNotEmpty
         ? SizedBox(
@@ -82,7 +91,7 @@ class _DropDownEstadosState extends State<Dropdownstatus> {
                         ),
                       )
                       .toList(),
-                  onChanged: widget.onChanged,
+                  onChanged: onChangeStatus,
                 ),
               ],
             ),
